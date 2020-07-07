@@ -93,11 +93,11 @@ def BGGextract():
 
             game_id_num = game.attrs['id']  #extracts the id='string' from any <item> tags
             
+            # Further refine soup opject to find primary game name. Only extract the game name value if the soup.find succesfully returns a result
             soup_name = game.find('name', type = 'primary')
-            game_name = soup_name.attrs['value']
-            
-            if game_name is not None:
-                               
+            if soup_name is not None:
+                game_name = soup_name.attrs['value']
+
                 # Not all 'item' tags in BGG have a yearpublished value, so assign 0 where it is missing
                 soup_year = game.find('yearpublished')
                 if (soup_year is not None) and (soup_year.attrs['value'] != ''):
@@ -111,13 +111,15 @@ def BGGextract():
 
                 print(game_id_num + ' ' + title + ' [' + str(year_published) + ']') #output to terminal to monitor proress
 
+                # Assign values to spreadsheet cells
                 sheet.cell(row = batch_rows + row_counter, column = 1).value = int(game_id_num)
                 sheet.cell(row = batch_rows + row_counter, column = 2).value = str(title)
                 sheet.cell(row = batch_rows + row_counter, column = 3).value = int(year_published)
 
+                # Increment counter for number of rows written (out of the 100 ID#s iterated through in each batch)
                 batch_rows += 1
 
-        row_counter += batch_rows #record # of rows written in this batch, incrementing the global row count variable
+        row_counter += batch_rows #Add this loop iteration's row counting value to the existing total row count variable
         
         print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')        
         wb.save(str(filename))   #saves the file
