@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup  #function for reading the page's XML returned by 
 import re    #support for regular expressions
 from time import sleep  #sleep function allows pausing of script, to avoid getting rate-limited by BGG
 import unicodecsv as csv  #use the unicodecsv library instead. Straight clone of CSV functions, but with unicode handling
-import itertools #uses zip function to iterate over two lists concurrently
 from random import randint  #generate random integers, used in randomizing wait time
 import openpyxl #used in creating and writing to .xlsx filtes
 from pathlib import Path #used in handling Path objects
@@ -83,35 +82,42 @@ def BGGextract():
         #Use requests and BeautifulSoup to extract and read XML. Separaetly pull XML tags: (1) of <name> with type "primary", (2) of <item>
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'lxml')
-        soup_names = soup.find_all('name', type = 'primary') 
+        #soup_names = soup.find_all('name', type = 'primary') 
         soup_items = soup.find_all('item')
         #soup_year = soup.find_all('yearpublished')
 
+        batch_rows = 0
+
         #iterate through the game name and ID# pairs, using attributes to extract game names and ID#
-        for (game, game_id) in zip(soup_names, soup_items):
-            game_name = game.attrs['value']
-            game_id_num = game_id.attrs['id']  #extracts the id='string' from any <item> tags
+        for game in soup_items:    
 
-            # Not all 'item' tags in BGG have a yearpublished value, so assign 0 where it is missing
-            soup_year = game_id.find('yearpublished')
-            if (soup_year is not None) and (soup_year.attrs['value'] != ''):
-                year_published = soup_year.attrs['value']
-            else:
-                year_published = 0
+            game_id_num = game.attrs['id']  #extracts the id='string' from any <item> tags
             
-            # Text formatting for game name
-            title = game_name.replace('&amp;', '&') # find and replace to correct HTML ampersand escaping
-            title = title.strip('"') # stripping of leading and trailing double quotes, which appear inconsistently in BGG entries (no explanation)
+            soup_name = game.find('name', type = 'primary')
+            game_name = soup_name.attrs['value']
+            
+            if game_name is not None:
+                               
+                # Not all 'item' tags in BGG have a yearpublished value, so assign 0 where it is missing
+                soup_year = game.find('yearpublished')
+                if (soup_year is not None) and (soup_year.attrs['value'] != ''):
+                    year_published = soup_year.attrs['value']
+                else:
+                    year_published = 0
+                
+                # Text formatting for game name
+                title = game_name.replace('&amp;', '&') # find and replace to correct HTML ampersand escaping
+                title = title.strip('"') # stripping of leading and trailing double quotes, which appear inconsistently in BGG entries (no explanation)
 
-            print(game_id_num + ' ' + title + ' [' + str(year_published) + ']') #output to terminal to monitor proress
+                print(game_id_num + ' ' + title + ' [' + str(year_published) + ']') #output to terminal to monitor proress
 
-            rowNum = soup_names.index(game) #determines the relative position in sequence of up to 100 rows to be written
+                sheet.cell(row = batch_rows + row_counter, column = 1).value = int(game_id_num)
+                sheet.cell(row = batch_rows + row_counter, column = 2).value = str(title)
+                sheet.cell(row = batch_rows + row_counter, column = 3).value = int(year_published)
 
-            sheet.cell(row = rowNum + row_counter, column = 1).value = int(game_id_num)
-            sheet.cell(row = rowNum + row_counter, column = 2).value = str(title)
-            sheet.cell(row = rowNum + row_counter, column = 3).value = int(year_published)
+                batch_rows += 1
 
-        row_counter = row_counter + (len(soup_names)) #record # of rows written in this batch, incrementing the global row count variable
+        row_counter += batch_rows #record # of rows written in this batch, incrementing the global row count variable
         
         print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')        
         wb.save(str(filename))   #saves the file
