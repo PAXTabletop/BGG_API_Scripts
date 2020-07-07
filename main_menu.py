@@ -33,7 +33,7 @@ while loop:  ## Continues executing until loop is false
         BGG_GameID_Collector.BGGextract()
 
     elif choice == 2:
-        print ('\n' + 'Starting game title correction... [this may take some time, ~20 seconds]')
+        print ('\n' + 'Starting game title correction...')
         PAX_Title_Corrector.main()
 
     elif choice == 3:
