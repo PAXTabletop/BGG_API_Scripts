@@ -96,7 +96,7 @@ def BGGextract():
             # Further refine soup opject to find primary game name. Only extract the game name value if the soup.find succesfully returns a result
             soup_name = game.find('name', type = 'primary')
 
-            if (soup_name is not None) and (category != 'videogame'):
+            if soup_name is not None:
                 game_name = soup_name.attrs['value']
 
                 # Not all 'item' tags in BGG have a yearpublished value, so assign 0 where it is missing
@@ -114,7 +114,10 @@ def BGGextract():
 
                 # Assign values to spreadsheet cells
                 sheet.cell(row = batch_rows + row_counter, column = 1).value = int(game_id_num)
-                sheet.cell(row = batch_rows + row_counter, column = 2).value = str(title)
+                if category != 'videogame':
+                    sheet.cell(row = batch_rows + row_counter, column = 2).value = str(title)
+                else:
+                    sheet.cell(row = batch_rows + row_counter, column = 2).value = 'video game title removed'
                 sheet.cell(row = batch_rows + row_counter, column = 3).value = int(year_published)
                 sheet.cell(row = batch_rows + row_counter, column = 4).value = str(category)
 
