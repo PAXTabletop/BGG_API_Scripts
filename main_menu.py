@@ -29,25 +29,29 @@ while loop:  ## Continues executing until loop is false
 
     ### Take actions as per selected menu-option ###
     if choice == 1:
-        print ('\n' + 'Attempting to locate existing BGG ID# index...')
+        print ('\n Attempting to locate existing BGG ID# index...')
         BGG_GameID_Collector.BGGextract()
 
     elif choice == 2:
-        print ('\n' + 'Starting game title correction...')
+        print ('\n Starting game title correction...')
         PAX_Title_Corrector.main()
 
     elif choice == 3:
-        print('\n' + 'Starting collection of metadata...')
+        print('\n Starting collection of metadata...')
         BGG_Metadata_Collector.data_collect()
 
     elif choice == 4: 
-        print('\n' + 'Current working directory is: ' + str(Path.cwd()))
+        print('\n Current working directory is: ' + str(Path.cwd()))
         sleep(1)
 
     elif choice == 5:
-        print ('\n' + 'Exiting scipt. Have a nice day!')
+        print ('\n Exiting scipt. Have a nice day!')
         sleep(1)
         sys.exit()
+
+    elif choice == 69:
+        print ('\n nice ')
+        sleep(3)
 
     else:    
         print ("Invalid number. Please try again.")
