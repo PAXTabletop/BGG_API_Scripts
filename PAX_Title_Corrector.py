@@ -171,7 +171,7 @@ def main():
     # TO-DO: Once Tabletop Library is updated to include a corrections report (which will match output format of this script), tree can be simplified
     if choice == 1:
         try:
-            PAXgames = open('TTLibrary_Titles-testshort.csv', mode='r', newline='')
+            PAXgames = open('TTLibrary_Titles', mode='r', newline='')
             reader = csv.reader(PAXgames) # Read .csv into a variable
             next(reader)
             for rows in reader:  # Iterate through input csv and append different elements of each row to the appropriate list
