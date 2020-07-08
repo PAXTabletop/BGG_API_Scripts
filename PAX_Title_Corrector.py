@@ -16,6 +16,8 @@ def main():
 
     def DupesCheck(name):
         
+        print ('\n Checking BGG index for duplicate game name entries...')
+
         #See if the dictionary value for game name is a nested dictionary with more than one entry. If so, print them to menu and prompt user to choose one.
         if len(BGGnames[name]) > 1:
             #for games in that dict, enumerate their values and print to screen
@@ -23,30 +25,32 @@ def main():
                 print(str(index + 1) + ' - BGG ID#: ' + str(game) + ' - Year Published: ' + str(BGGnames[name][game]))    
             
             # Take user input to select among duplicates, while taking measures to validate input            
-            selected_ID = 0 
+            selected_val = 0 
             while True:
                 #Ensure an integer is input
                 try: 
-                    selected_ID = int(input('Please enter the index # of the selected match: '))  #could add a reference dict in the enumerate line above, with index as the key, BGG ID as the value
+                    selected_val = int(input('Please enter the index # of the selected match: '))  #could add a reference dict in the enumerate line above, with index as the key, BGG ID as the value
                 except ValueError:
                     print('Input must be numeric')
                     continue
 
                 #Then ensure that integer is within range (length of the nested dictionary)
-                if (int(selected_ID) > len(BGGnames[name].keys()) or int(selected_ID <= 0)):  
+                if (int(selected_val) > len(BGGnames[name].keys()) or int(selected_val <= 0)):  
                     print ('Sorry, input is out of range')
                     continue
                 else:
                     break
-
+            
+            pass_ID = list(BGGnames[name].keys())[selected_val - 1]
             lock = True  #Set flag locking row from future Corrector runs, so user does not have to re-resolve dupes
            
         else:
-            selected_ID = list(BGGnames[name].keys())[0]
+            print('No duplicates found. Writing BGG ID# ' + int(list(BGGnames[name].keys())[0]))
+            pass_ID = list(BGGnames[name].keys())[0]
             lock = False  #Do not set flag locking row. There was only 1 BGG match, so there is no burden to user in including this entry in future re-runs of script.
             #There is a higher likelihood, albeit small one, that the game is not yet listed on BGG, but is being matched to a classic title of same name
 
-        return selected_ID, lock
+        return pass_ID, lock
     
     ########################################################################
     # Function to write a row to the PAX Corrections csv
@@ -255,7 +259,7 @@ def main():
             
             # If match was not found, try again with manually-input revision to title.
             if status == 'fail':
-                print('No match was found on first attempt')
+                print('\n No match was found on first attempt')
                 manual_title = input('Please manually enter a corrected title. If unsure, leave blank to skip: ')
                 if manual_title == '':
                     TitleWriting(game, manual_title)
@@ -267,11 +271,12 @@ def main():
             # If match was still not found on second attempt, allow for full manual correction without BGG link
                 print(game + ' - Has no BGG match found, and was unable to be corrected through manual adjustment')
                 manual_title = input('Please manually enter a corrected title. This will be written to the PAX dB without attempt to find a BGG match. If unsure, leave blank to skip: ')
+                print('\n')
                 TitleWriting(game, manual_title, 'fail')
         
         # Clear match was found between PAX & BGG:
         else:
-            print(game +  ' - No correction needed. BGG ID# is ' + str(list(BGGnames[game].keys())[0]) + ' PAX ID# is ' + str(PAXids[PAXnames.index(game)]))
+            print(game + ' has clear match in BGG index')
             TitleWriting(game)
 
         print('\n') 
