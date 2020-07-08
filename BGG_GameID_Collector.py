@@ -56,6 +56,7 @@ def BGGextract():
             sheet['A1'] = 'BGG ID'
             sheet['B1'] = 'Game Title'
             sheet['C1'] = 'Year Published'
+            sheet['D1'] = 'Category'
             row_counter = 1 # Set rowcounter flag to begin at start of sheet. Acts as global variable to hold position of future row batches to be written.
         else:
             print('Returning to main menu...')
@@ -82,20 +83,20 @@ def BGGextract():
         #Use requests and BeautifulSoup to extract and read XML. Separaetly pull XML tags: (1) of <name> with type "primary", (2) of <item>
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'lxml')
-        #soup_names = soup.find_all('name', type = 'primary') 
         soup_items = soup.find_all('item')
-        #soup_year = soup.find_all('yearpublished')
-
+        
         batch_rows = 0
 
         #iterate through the game name and ID# pairs, using attributes to extract game names and ID#
         for game in soup_items:    
 
             game_id_num = game.attrs['id']  #extracts the id='string' from any <item> tags
+            category = game.attrs['type']
             
             # Further refine soup opject to find primary game name. Only extract the game name value if the soup.find succesfully returns a result
             soup_name = game.find('name', type = 'primary')
-            if soup_name is not None:
+
+            if (soup_name is not None) and (category != 'videogame'):
                 game_name = soup_name.attrs['value']
 
                 # Not all 'item' tags in BGG have a yearpublished value, so assign 0 where it is missing
@@ -115,6 +116,7 @@ def BGGextract():
                 sheet.cell(row = batch_rows + row_counter, column = 1).value = int(game_id_num)
                 sheet.cell(row = batch_rows + row_counter, column = 2).value = str(title)
                 sheet.cell(row = batch_rows + row_counter, column = 3).value = int(year_published)
+                sheet.cell(row = batch_rows + row_counter, column = 4).value = str(category)
 
                 # Increment counter for number of rows written (out of the 100 ID#s iterated through in each batch)
                 batch_rows += 1
