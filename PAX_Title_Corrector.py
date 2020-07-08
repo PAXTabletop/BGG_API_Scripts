@@ -16,36 +16,79 @@ def main():
 
     def DupesCheck(name):
         
-        print ('\n Checking BGG index for duplicate game name entries...')
+        print ('Checking BGG index for duplicate game name entries...')
 
         #See if the dictionary value for game name is a nested dictionary with more than one entry. If so, print them to menu and prompt user to choose one.
         if len(BGGnames[name]) > 1:
+            print('\n')
+
             #for games in that dict, enumerate their values and print to screen
             for index, game in enumerate(BGGnames[name].keys()):
                 print(str(index + 1) + ' - BGG ID#: ' + str(game) + ' - Year Published: ' + str(BGGnames[name][game]))    
-            
+            print(len(BGGnames[name]) + 1, ' - No match') #Add an extra entry, one above match list's range, for "N/A" option
+
             # Take user input to select among duplicates, while taking measures to validate input            
             selected_val = 0 
             while True:
                 #Ensure an integer is input
                 try: 
-                    selected_val = int(input('Please enter the index # of the selected match: '))  #could add a reference dict in the enumerate line above, with index as the key, BGG ID as the value
+                    selected_val = int(input('\nPlease select a match: '))  #could add a reference dict in the enumerate line above, with index as the key, BGG ID as the value
                 except ValueError:
                     print('Input must be numeric')
                     continue
 
                 #Then ensure that integer is within range (length of the nested dictionary)
-                if (int(selected_val) > len(BGGnames[name].keys()) or int(selected_val <= 0)):  
+                if (int(selected_val) > len(BGGnames[name].keys()) + 1 or int(selected_val <= 0)):  
                     print ('Sorry, input is out of range')
                     continue
                 else:
                     break
+
+            # User has selected 'no match' and must be prompted for a manual re-entry of game name 
+            if selected_val == len(BGGnames[name].keys()) + 1:
+                manual_title = input('\nPlease manually enter a corrected title. If unsure, leave blank to skip: ')
+                                
+                # User has decided not to enter a manual name
+                if manual_title == '':
+                    pass_ID = 0
+                    lock = False  #No BGG match was attempted, so continue to attempt on future runs
+                    ErrorWriter.write(name + ', with no matches selected among duplicate BGG entries. No manual correction attempted\n')
+                
+                # User has entered a manual name
+                else: 
+                    # Check length of matches against manual name in BGG index, and prompt user for selection
+                    match = get_close_matches(manual_title, BGGnames.keys(), n=3, cutoff = 0.7)
+                    if len(match) != 0:
+                        selected = MatchSelector(match, manual_title)
+                        
+                        # User selected a valid match
+                        #WARNING - This manual input match will not be checked for duplicate BGG values!
+                        if int(selected) <= int(len(match)):
+                            print('Thank you for selecting input #' + str(selected) +": " + match[int(selected) - 1])
+                            if len(BGGnames[match[int(selected) - 1]]) > 1:
+                                print('Warning: Multiple BGG entries were found for this title, but first result was automatically selection. Recommend manual inspection.')
+                            pass_ID = list(BGGnames[match[int(selected) - 1]].keys())[0]
+                            lock = True
+                        
+                        # User selected no match
+                        else:
+                            pass_ID = 0
+                            lock = False
+                            ErrorWriter.write(name + ', with unsuccessful attempt to manually correct as: ' + manual_title + '\n')
+                    
+                    # There were no matches in the BGG index for the manual name
+                    else:
+                        pass_ID = 0
+                        lock = False
+                        ErrorWriter.write(name + ', with unsuccessful attempt to manually correct as: ' + manual_title + '\n')
             
-            pass_ID = list(BGGnames[name].keys())[selected_val - 1]
-            lock = True  #Set flag locking row from future Corrector runs, so user does not have to re-resolve dupes
+            # User has selected one of the duplicate BGG entries
+            else:
+                pass_ID = list(BGGnames[name].keys())[selected_val - 1]
+                lock = True  #Set flag locking row from future Corrector runs, so user does not have to re-resolve dupes
            
         else:
-            print('No duplicates found. Writing BGG ID# ' + int(list(BGGnames[name].keys())[0]))
+            print('No duplicates found. Linking ' + name + ' to BGG ID# ' + str(list(BGGnames[name].keys())[0]))
             pass_ID = list(BGGnames[name].keys())[0]
             lock = False  #Do not set flag locking row. There was only 1 BGG match, so there is no burden to user in including this entry in future re-runs of script.
             #There is a higher likelihood, albeit small one, that the game is not yet listed on BGG, but is being matched to a classic title of same name
@@ -84,7 +127,7 @@ def main():
     def MatchSelector(match, title):
         #Function takes in the PAX title and its corresponding get_close_matches object
 
-        print(title + ' - Has potential correction from BGG search:')
+        print('\n' + title + ' - Has potential correction from BGG search:')
         for index, name in enumerate(match):
             print(index + 1, name) #index is incremented for user-friendliness, so list does not start at 0
         print(len(match) + 1, 'No match') #Add an extra entry, one above match list's range, for "N/A" option
@@ -95,7 +138,7 @@ def main():
         while True:
             #Ensure an integer is input
             try: 
-                selected = int(input('Please select a match: '))
+                selected = int(input('\nPlease select a match: '))
             except ValueError:
                 print('Input must be numeric')
                 continue
@@ -113,7 +156,7 @@ def main():
     # Function to drive attempting of a match. Calls MatchSelector and TitleWriting functions. Can sense if first or subsequent attempt.
     ###################################################################################################################################
 
-    def AttemptMatch(game, BGGnames, manual_name = ''):
+    def AttemptMatch(game, manual_name = ''):
         if manual_name == '':
             match = get_close_matches(game, BGGnames.keys(), n=3, cutoff = 0.7)
         else:
@@ -227,7 +270,7 @@ def main():
     try:
         wb = openpyxl.load_workbook('BGG_IDs.xlsx')
     except: 
-        print('Error: Could not locate index of BGG names/IDs. \n Please load BGG_ID_spreadsheet_complete.xlsx into current working directory and restart script')
+        print('Error: Could not locate index of BGG names/IDs. \nPlease load BGG_ID_spreadsheet_complete.xlsx into current working directory and restart script')
         return
     sheet = wb.active
 
@@ -255,17 +298,17 @@ def main():
     for game in PAXnames:
         if game not in BGGnames.keys():
             print('Attempting match of ' + game)
-            status = AttemptMatch(game, BGGnames)
+            status = AttemptMatch(game)
             
             # If match was not found, try again with manually-input revision to title.
             if status == 'fail':
-                print('\n No match was found on first attempt')
+                print('\nNo match was found on first attempt')
                 manual_title = input('Please manually enter a corrected title. If unsure, leave blank to skip: ')
                 if manual_title == '':
                     TitleWriting(game, manual_title)
                     status = 'done'  #revert the status code returned by AttemptMatch() so user is not prompted for manual input again in next code block (if status == 'fail')
                 else:
-                    status = AttemptMatch(game, BGGnames, manual_title)
+                    status = AttemptMatch(game, manual_title)
                     
             if status == 'fail':
             # If match was still not found on second attempt, allow for full manual correction without BGG link
