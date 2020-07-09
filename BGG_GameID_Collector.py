@@ -126,9 +126,9 @@ def BGGextract():
 
         row_counter += batch_rows #Add this loop iteration's row counting value to the existing total row count variable
         
-        print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')        
+        print('\n' + 'Attempting to load next batch of BGG IDs. Will take 5-10 seconds...' '\n')        
         wb.save(str(filename))   #saves the file
-        sleep(randint(10,15))  #sleep to prevent rate-limit or DOS
+        sleep(randint(5,10))  #sleep to prevent rate-limit or DOS
 
 
     print('BGG Extract has completed, and file has been saved')
