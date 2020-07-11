@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests   #support for pulling contents of webpages
 from bs4 import BeautifulSoup  #function for reading the page's XML returned by requests library
 import re    #support for regular expressions
@@ -63,6 +64,15 @@ def BGGextract():
             sleep(2)
             return
 
+
+    ######################################################
+    # Set up error logging
+    ######################################################
+
+    #Open a text file for logging of skipped 100-game batches (likely due to internet hiccup or rate-limiting). Write header message with timestamp.
+    ErrorWriter = open('GameBatchSkip_Log.txt', 'a+') #append mode used to continue growing log
+    ErrorWriter.write('\n \nTitle Corrector was run on ' + str(datetime.now()) + '\nThe following game batches were likely skipped: \n')
+
     ######################################################
     # Perform exraction of info from BGG and write to file
     ######################################################
@@ -85,6 +95,10 @@ def BGGextract():
         soup = BeautifulSoup(response.text, 'lxml')
         soup_items = soup.find_all('item')
         
+        if soup_items == []:
+            ErrorWriter.write(str(first_item) + ' to ' + str(last_item) + '\n')
+
+
         batch_rows = 0
 
         #iterate through the game name and ID# pairs, using attributes to extract game names and ID#
@@ -126,11 +140,13 @@ def BGGextract():
 
         row_counter += batch_rows #Add this loop iteration's row counting value to the existing total row count variable
         
-        print('\n' + 'Attempting to load next batch of BGG IDs. Will take 5-10 seconds...' '\n')        
+        print('\nSaving... \n')
         wb.save(str(filename))   #saves the file
-        sleep(randint(5,10))  #sleep to prevent rate-limit or DOS
+        print('\n' + 'Attempting to load next batch of BGG IDs. Will take 15-20 seconds...')        
+        sleep(randint(15,20))  #sleep to prevent rate-limit or DOS
+        print('    ....next batch loaded. Writing games:\n')
 
-
+    ErrorWriter.close()
     print('BGG Extract has completed, and file has been saved')
     return
     
@@ -153,11 +169,12 @@ def BGGmaxitem():
     for game in soup_names:
         ID_regex = re.compile(r'(?<=guid>https://boardgamegeek.com/boardgame/)\d\d\d\d\d\d')  #define regex that strips out all but the six BGG ID# digits
         id_num = ID_regex.search(str(game))   #apply the regex
-        if (type(id_num) == re.Match):  #Ensure valid # was returned. For non boardgame entries on BGG, the regex will fail and not create an re.Match object. Could also use 'is not None' here
+        if (type(id_num) == re.Match):  #Ensure valid # was returned. For non boardgame entries on BGG, the regex will fail and not create an re.Match object. Could also use 'is not None' here?
             if (int(game_id_num) <= int(id_num.group())):
                 game_id_num = int(id_num.group())
     
     return(game_id_num)
+
 
 
 ############################################

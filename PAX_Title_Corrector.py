@@ -20,8 +20,7 @@ def main():
 
         #See if the dictionary value for game name is a nested dictionary with more than one entry. If so, print them to menu and prompt user to choose one.
         if len(BGGnames[name]) > 1:
-            print('\n')
-
+            
             #for games in that dict, enumerate their values and print to screen
             for index, game in enumerate(BGGnames[name].keys()):
                 print(str(index + 1) + ' - BGG ID#: ' + str(game) + ' - Year Published: ' + str(BGGnames[name][game]))    
