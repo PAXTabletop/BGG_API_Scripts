@@ -9,6 +9,25 @@ import openpyxl #used in creating and writing to .xlsx filtes
 from pathlib import Path #used in handling Path objects
 import os #used in reading and creating directory for output
 import sys #used to quit script
+import unicodedata
+
+#########################################################
+# Function to strip accents from game titles
+#########################################################
+
+def strip_accents(text):
+
+    try:
+        text = unicode(text, 'utf-8')
+    except NameError: # unicode is a default on python 3 
+        pass
+
+    text = unicodedata.normalize('NFD', text)\
+           .encode('ascii', 'ignore')\
+           .decode("utf-8")
+
+    return str(text)
+
 
 #########################################################
 # Function to extract info from BGG and perform file I/O
@@ -123,6 +142,10 @@ def BGGextract():
                 # Text formatting for game name
                 title = game_name.replace('&amp;', '&') # find and replace to correct HTML ampersand escaping
                 title = title.strip('"') # stripping of leading and trailing double quotes, which appear inconsistently in BGG entries (no explanation)
+                title = strip_accents(title)
+                title = title.strip(' ')
+                title = title.strip('(')
+                title = title.strip(')')
 
                 print(game_id_num + ' ' + title + ' [' + str(year_published) + ']') #output to terminal to monitor proress
 
