@@ -35,7 +35,7 @@ def data_collect():
 
     #use next() function to clear the first row in CSV reader, but replace header value with new list of column names for export
     header = next(reader)
-    header = ['Title', 'PAX ID', 'BGG ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight']
+    header = ['Title', 'PAX ID', 'BGG ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Description']
 
     for rows in reader:
         PAXnames.append(rows[0])
@@ -61,7 +61,7 @@ def data_collect():
             URL_args = ','.join(list(map(str,ID_range))) 
             url = base_url + URL_args  + '&stats=1'
                                    
-            #Use requests and BeautifulSoup to extract and read XML. Separaetly pull XML tags: (1) of <name> with type "primary", (2) of <item>
+            #Use requests and BeautifulSoup to extract and read XML. Separately pull XML tags: (1) of <name> with type "primary", (2) of <item>
             response = requests.get(url)
             soup = BeautifulSoup(response.text, 'lxml')
             soup_min = soup.find_all('minplayers') 
@@ -71,9 +71,10 @@ def data_collect():
             soup_age = soup.find_all('minage')
             soup_rating = soup.find_all('average')
             soup_weight = soup.find_all('averageweight')
-        
+            soup_desc = soup.find_all('description')
+                    
             #Regex processing of soup objects. Include BGG_id sequence from ID_range to use as index value of PAXnames/PAXids when writing csv
-            for min_player, max_player, year, time, age, rating, weight, BGG_id in zip(soup_min, soup_max, soup_year, soup_time, soup_age, soup_rating, soup_weight, ID_range):
+            for min_player, max_player, year, time, age, rating, weight, desc, BGG_id in zip(soup_min, soup_max, soup_year, soup_time, soup_age, soup_rating, soup_weight, soup_desc, ID_range):
                 game_min_player = min_player.attrs['value']
                 game_max_player = max_player.attrs['value']
                 year_published = year.attrs['value']
@@ -82,9 +83,15 @@ def data_collect():
                 avg_rating = rating.attrs['value']
                 avg_weight = weight.attrs['value']
 
+                desc = str(desc)
+                desc = desc.replace('&amp;', '&')
+                desc = desc.replace('#10;', ' ')
+                desc = desc.replace('<description>','')
+                desc = desc.replace('</description>','')
+
                 #Write row to CSV only if game has a BGG ID#. Behavior dependent on PAX_Title_Corrector.py behavior that writes zeros to blank BGG ID# fields
                 if BGG_id != 0:
-                    DataWriter.writerow([PAXnames[BGGids.index(BGG_id)], PAXids[BGGids.index(BGG_id)], BGG_id, game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight])
+                    DataWriter.writerow([PAXnames[BGGids.index(BGG_id)], PAXids[BGGids.index(BGG_id)], BGG_id, game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, desc])
                     print(PAXnames[BGGids.index(BGG_id)])
 
             print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')   
