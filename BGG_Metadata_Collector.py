@@ -34,7 +34,7 @@ def data_collect():
     
     #use next() function to clear the first row in CSV reader, but replace header value with new list of column names for export
     header = next(reader)
-    header = ['Title', 'PAX ID', 'BGG ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Families','Mechanics','Categories','Description']
+    header = ['PAX ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Families','Mechanics','Categories','Description']
 
     for rows in reader:
         PAXnames.append(rows[0])
@@ -58,13 +58,13 @@ def data_collect():
 
     base_url = 'https://www.boardgamegeek.com/xmlapi2/thing?id='
 
-    #Collect metadata in 100-game chunks. Executes when number of ID#s appended to BGG API's URL is divible by 100, or if the last ID appended matches last ID in the list
+    #Collect metadata one game at a time, necessary because family/category/mechanics <link> tags appear multiple times for each game and would require regex to parse from larger batch
     for IDs in BGGids:
         if IDs != 0:
             url = base_url + IDs  + '&stats=1'
             print(url)
                                     
-            #Use requests and BeautifulSoup to extract and read XML. Separately pull XML tags: (1) of <name> with type "primary", (2) of <item>
+            #Use requests and BeautifulSoup to extract and read XML. 
             response = requests.get(url)
             soup = BeautifulSoup(response.text, 'lxml')
             soup_min = soup.find('minplayers') 
@@ -77,6 +77,8 @@ def data_collect():
             soup_desc = soup.find('description')
             soup_links = soup.find_all('link')
 
+
+            #Build dictionaries that contain master lists of the three meta tags collected. Key = tag's ID#, value = full text name of that key
             families = []
             mechanics = []
             categories = []
@@ -95,7 +97,7 @@ def data_collect():
                     if links.attrs['id'] not in families_full.keys():
                         families_full[links.attrs['id']] = links.attrs['value']
                         
-            #Regex processing of soup objects. Include BGG_id sequence from ID_range to use as index value of PAXnames/PAXids when writing csv
+            #Extract value from XML tags. When values do not exist, set to 0
             try:
                 game_min_player = soup_min.attrs['value']
             except:
@@ -125,6 +127,7 @@ def data_collect():
             except:
                 avg_weight = 0
 
+            #Text formatting for the Description paragraph
             desc = str(soup_desc)
             desc = desc.replace('&amp;', '&')
             desc = desc.replace('#10;', ' ')
@@ -132,7 +135,7 @@ def data_collect():
             desc = desc.replace('</description>','')
 
             #Write row to CSV only if game has a BGG ID#. Behavior dependent on PAX_Title_Corrector.py behavior that writes zeros to blank BGG ID# fields
-            DataWriter.writerow([PAXnames[BGGids.index(IDs)], PAXids[BGGids.index(IDs)], IDs, game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
+            DataWriter.writerow([PAXids[BGGids.index(IDs)], game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
             print(PAXnames[BGGids.index(IDs)])
         
         print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')   
