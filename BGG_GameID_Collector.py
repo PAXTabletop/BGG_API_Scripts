@@ -77,6 +77,7 @@ def BGGextract():
             sheet['B1'] = 'Game Title'
             sheet['C1'] = 'Year Published'
             sheet['D1'] = 'Category'
+            sheet['E1'] = 'Raw Title'
             row_counter = 1 # Set rowcounter flag to begin at start of sheet. Acts as global variable to hold position of future row batches to be written.
         else:
             print('Returning to main menu...')
@@ -139,10 +140,10 @@ def BGGextract():
                 else:
                     year_published = 0
                 
-                # Text formatting for game name
-                title = game_name.replace('&amp;', '&') # find and replace to correct HTML ampersand escaping
-                title = title.strip('"') # stripping of leading and trailing double quotes, which appear inconsistently in BGG entries (no explanation)
-                title = strip_accents(title)
+                # Text formatting for game name, removing encoded characters and diacritics
+                raw_title = game_name.replace('&amp;', '&') # find and replace to correct HTML ampersand escaping
+                raw_title = raw_title.strip('"') # stripping of leading and trailing double quotes, which appear inconsistently in BGG entries (no explanation)
+                title = strip_accents(raw_title)
                 title = title.strip(' ')
                 title = title.strip('(')
                 title = title.strip(')')
@@ -153,6 +154,7 @@ def BGGextract():
                 sheet.cell(row = batch_rows + row_counter, column = 1).value = int(game_id_num)
                 if category != 'videogame':
                     sheet.cell(row = batch_rows + row_counter, column = 2).value = str(title)
+                    sheet.cell(row = batch_rows + row_counter, column = 5).value = str(raw_title)
                 else:
                     sheet.cell(row = batch_rows + row_counter, column = 2).value = 'video game title removed'
                 sheet.cell(row = batch_rows + row_counter, column = 3).value = int(year_published)
