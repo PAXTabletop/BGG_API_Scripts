@@ -135,7 +135,7 @@ def data_collect():
             desc = desc.replace('</description>','')
 
             #Write row to CSV only if game has a BGG ID#. Behavior dependent on PAX_Title_Corrector.py behavior that writes zeros to blank BGG ID# fields
-            DataWriter.writerow([PAXids[BGGids.index(IDs)], game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
+            DataWriter.writerow([PAXids[BGGids.index(IDs)], game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
             print(PAXnames[BGGids.index(IDs)])
         
         print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')   
