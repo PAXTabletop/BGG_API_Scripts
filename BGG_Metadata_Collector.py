@@ -5,6 +5,7 @@ from time import sleep  #sleep function allows pausing of script, to avoid getti
 from random import randint  #generate random integers, used in randomizing wait time
 import itertools #uses zip function to iterate over two lists concurrently
 from pathlib import Path #used in handling Path objects
+import html
 
 def data_collect():
     ###### LOAD PAX TITLES ######
@@ -133,7 +134,8 @@ def data_collect():
             desc = desc.replace('#10;', ' ')
             desc = desc.replace('<description>','')
             desc = desc.replace('</description>','')
-
+            desc = html.unescape(desc)
+           
             #Write row to CSV only if game has a BGG ID#. Behavior dependent on PAX_Title_Corrector.py behavior that writes zeros to blank BGG ID# fields
             DataWriter.writerow([PAXids[BGGids.index(IDs)], game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
             print(PAXnames[BGGids.index(IDs)])
