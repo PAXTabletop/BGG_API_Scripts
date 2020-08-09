@@ -3,7 +3,7 @@ import requests   #support for pulling contents of webpages
 from bs4 import BeautifulSoup  #function for reading the page's XML returned by requests library
 import re    #support for regular expressions
 from time import sleep  #sleep function allows pausing of script, to avoid getting rate-limited by BGG
-import unicodecsv as csv  #use the unicodecsv library instead. Straight clone of CSV functions, but with unicode handling
+import csv  #use the unicodecsv library instead. Straight clone of CSV functions, but with unicode handling
 from random import randint  #generate random integers, used in randomizing wait time
 import openpyxl #used in creating and writing to .xlsx filtes
 from pathlib import Path #used in handling Path objects
@@ -173,8 +173,27 @@ def BGGextract():
 
     ErrorWriter.close()
     print('BGG Extract has completed, and file has been saved')
-    return
-    
+  
+    #Create a CSV file and iterate through all of the Excel rows, writing as UTF-8 .csv file
+    choice = ''
+    while choice.lower() != 'n':  ## Continues executing until loop is false
+        choice = str(input('Would you like to generate a .CSV file output for Title Correction usage? [Y/N] '))
+
+        ### Take actions as per selected menu-option ###
+        if choice.lower() == 'y':
+            CSV_IDs = open('BGG_IDs.csv', 'w', newline='', encoding='utf-16')
+            IDs_Writer = csv.writer(CSV_IDs, delimiter=',', escapechar='\\', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+            for row_count in range(1,sheet.max_row):
+                IDs_Writer.writerow([str(sheet.cell(row = row_count, column = 1).value), str(sheet.cell(row = row_count, column = 2).value), str(sheet.cell(row = row_count, column = 3).value), str(sheet.cell(row = row_count, column = 4).value), str(sheet.cell(row = row_count, column = 5).value)])
+            CSV_IDs.close()
+            print('CSV conversion complete')
+            return
+        if choice.lower() == 'n':
+            return
+        else:    
+            print ("Invalid input. Please try again.")
+
+      
 
 ########################################################################
 # Function to determine highest ID# available on BGG's GeekFeed RSS page

@@ -21,9 +21,9 @@ def print_menu():
     print ("5. Exit")
     print (30 * '-')
 
-loop = True
+choice = ''
 
-while loop:  ## Continues executing until loop is false
+while choice != 5:  ## Continues executing until loop is false
     print_menu()
     choice = int(input('Please enter your choice [1-5]: '))
 
@@ -47,7 +47,6 @@ while loop:  ## Continues executing until loop is false
     elif choice == 5:
         print ('\n Exiting scipt. Have a nice day!')
         sleep(1)
-        sys.exit()
 
     elif choice == 69:
         print ('\n nice ')
@@ -56,3 +55,4 @@ while loop:  ## Continues executing until loop is false
     else:    
         print ("Invalid number. Please try again.")
 
+sys.exit()
