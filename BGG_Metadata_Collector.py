@@ -15,7 +15,7 @@ def data_collect():
     if Path(PAX_Titles_path).is_file():
         print('Loading PAXcorrections.csv...')
         try:
-            PAXgames = open(PAX_Titles_path, 'r', newline='', encoding='utf-16')
+            PAXgames = open(PAX_Titles_path, 'r', newline='', encoding='utf-8')
         except:
             print('Error loading file. Please load into current working directory and re-run script. Potential .csv type error - ensure UTF-16 encoding')
     else:
