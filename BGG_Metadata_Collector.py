@@ -139,7 +139,7 @@ def data_collect():
             DataWriter.writerow([PAXids[BGGids.index(IDs)], game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
             print(PAXnames[BGGids.index(IDs)])
         
-        print('\n' + 'Attempting to load next batch of BGG IDs. Will take 10-15 seconds...' '\n')   
+        print('\n' + 'Attempting to load next BGG ID#. Will take 10-15 seconds...' '\n')   
         sleep(randint(10,15))  #sleep to prevent rate-limit
 
     BGGmetadata.close()
