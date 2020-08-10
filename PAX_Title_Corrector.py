@@ -290,7 +290,7 @@ def main():
     ###### Prepare file I/O: Open files to be written ######
 
     #Open output csv for writing corrected titles, set the writer object, and write the header
-    PAXcorrections = open('PAXcorrections.csv', 'w', newline='', encoding='utf-16')
+    PAXcorrections = open('PAXcorrections.csv', 'w', newline='', encoding='utf-8')
     TitleWriter = csv.writer(PAXcorrections, delimiter=',', escapechar='\\', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
     TitleWriter.writerow(header)
 

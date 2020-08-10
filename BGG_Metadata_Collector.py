@@ -21,7 +21,7 @@ def data_collect():
     else:
         PAX_Titles_path = input('No Game Title Correction export (PAXcorrections.csv) found. Please manually input filename: ')
         if Path(PAX_Titles_path).is_file():
-            PAXgames = open(PAX_Titles_path, 'r', newline='', encoding='utf-16')
+            PAXgames = open(PAX_Titles_path, 'r', newline='', encoding='utf-8')
         else:
             print('No such filename found. Exiting to main menu...')
             sleep(2)
@@ -36,7 +36,7 @@ def data_collect():
     
     #use next() function to clear the first row in CSV reader, but replace header value with new list of column names for export
     next(reader)
-    #header = ['PAX ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Families','Mechanics','Categories','Description']
+    header = ['PAX ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Families','Mechanics','Categories','Description']
     #print(header)
     
     for rows in reader:
@@ -49,7 +49,7 @@ def data_collect():
     #Open file for writing, set the writer object, and write the header
     BGGmetadata = open('BGGmetadata.csv', 'w', newline='', encoding='utf-8')
     DataWriter = csv.writer(BGGmetadata, delimiter=',', escapechar='\\', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-    #DataWriter.writerow(header)
+    DataWriter.writerow(header)
 
     ###### SET MASTER KEYS FOR TAG DICTIONARIES ######
     categories_full = {}
