@@ -7,6 +7,7 @@ import itertools #uses zip function to iterate over two lists concurrently
 from pathlib import Path #used in handling Path objects
 import html
 
+
 def data_collect():
     ###### LOAD PAX TITLES ######
     # Read in elements of .csv to different lists, iterating over every row in the PAX Titles csv
@@ -34,9 +35,10 @@ def data_collect():
     BGGids = []
     
     #use next() function to clear the first row in CSV reader, but replace header value with new list of column names for export
-    header = next(reader)
-    header = ['PAX ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Families','Mechanics','Categories','Description']
-
+    next(reader)
+    #header = ['PAX ID', 'Min Player', 'Max Player', 'Year Published', 'Playtime', 'Minimum Age', 'Avg Rating', 'Weight', 'Families','Mechanics','Categories','Description']
+    #print(header)
+    
     for rows in reader:
         PAXnames.append(rows[0])
         PAXids.append(rows[2])
@@ -45,9 +47,9 @@ def data_collect():
 
     ###### OPEN NEW CSV FOR WRITING ######
     #Open file for writing, set the writer object, and write the header
-    BGGmetadata = open('BGGmetadata.csv', 'w', newline='', encoding='utf-16')
+    BGGmetadata = open('BGGmetadata.csv', 'w', newline='', encoding='utf-8')
     DataWriter = csv.writer(BGGmetadata, delimiter=',', escapechar='\\', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-    DataWriter.writerow(header)
+    #DataWriter.writerow(header)
 
     ###### SET MASTER KEYS FOR TAG DICTIONARIES ######
     categories_full = {}
@@ -75,7 +77,7 @@ def data_collect():
             soup_age = soup.find('minage')
             soup_rating = soup.find('average')
             soup_weight = soup.find('averageweight')
-            soup_desc = soup.find('description')
+            soup_desc = soup.find('description').get_text()
             soup_links = soup.find_all('link')
 
 
@@ -129,13 +131,10 @@ def data_collect():
                 avg_weight = 0
 
             #Text formatting for the Description paragraph
-            desc = str(soup_desc)
-            desc = desc.replace('&amp;', '&')
-            desc = desc.replace('#10;', ' ')
-            desc = desc.replace('<description>','')
-            desc = desc.replace('</description>','')
-            desc = html.unescape(desc)
-           
+            desc = BeautifulSoup(soup_desc, 'html5lib')
+            desc = str(desc).replace('<html><head></head><body>','')
+            desc = str(desc).replace('</body></html>','')
+                 
             #Write row to CSV only if game has a BGG ID#. Behavior dependent on PAX_Title_Corrector.py behavior that writes zeros to blank BGG ID# fields
             DataWriter.writerow([PAXids[BGGids.index(IDs)], game_min_player, game_max_player, year_published, play_time, min_age, avg_rating, avg_weight, families, mechanics, categories, desc])
             print(PAXnames[BGGids.index(IDs)])
