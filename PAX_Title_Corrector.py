@@ -157,7 +157,15 @@ def main():
 
     def AttemptMatch(game, manual_name = ''):
         if manual_name == '':
-            match = get_close_matches(game, BGGnames.keys(), n=3, cutoff = 0.7)
+            case_match = get_close_matches(game, BGGnames.keys(), n=3, cutoff = 0.7)
+            if len(case_match) != 0:
+                if game.lower() == case_match[0].lower():
+                    TitleWriting(game, get_close_matches(game, BGGnames.keys(), n=3, cutoff = 0.7)[0])
+                    return 'success'
+                else:
+                    match = get_close_matches(game, BGGnames.keys(), n=3, cutoff = 0.7)
+            else:
+                match = get_close_matches(game, BGGnames.keys(), n=3, cutoff = 0.7)
         else:
             match = get_close_matches(manual_name, BGGnames.keys(), n=3, cutoff = 0.7)
 
