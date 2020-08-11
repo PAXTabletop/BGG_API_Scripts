@@ -153,6 +153,7 @@ def main():
 
     ###################################################################################################################################
     # Function to drive attempting of a match. Calls MatchSelector and TitleWriting functions. Can sense if first or subsequent attempt.
+    # First checks to see if the first match object is a case-insenstive match
     ###################################################################################################################################
 
     def AttemptMatch(game, manual_name = ''):
