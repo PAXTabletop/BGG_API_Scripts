@@ -63,7 +63,7 @@ def data_collect():
 
     #Collect metadata one game at a time, necessary because family/category/mechanics <link> tags appear multiple times for each game and would require regex to parse from larger batch
     for IDs in BGGids:
-        if IDs != 0:
+        if IDs != '0':
             url = base_url + IDs  + '&stats=1'
             print(url)
                                     
